@@ -89,7 +89,7 @@
       50% { opacity: 1; transform: scale(1.02); }
     }
 
-    /* Elegant & Beautiful Author Badge */
+    /* Author Badge */
     .author-credit {
       position: absolute;
       bottom: 25px;
@@ -138,9 +138,9 @@
       margin: 0.8rem;
       border-radius: 12px;
       cursor: pointer;
-      width: 300px;
+      width: 320px;
       transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5), 0 1px 2px rgba(255, 255, 255, 0.05) inset;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
       position: relative;
       overflow: hidden;
     }
@@ -148,7 +148,7 @@
     .menu-btn:hover {
       border-color: #00d2ff;
       transform: translateY(-3px) scale(1.02);
-      box-shadow: 0 8px 25px rgba(0, 210, 255, 0.3), 0 0 10px rgba(0, 210, 255, 0.2);
+      box-shadow: 0 8px 25px rgba(0, 210, 255, 0.3);
       color: #e0f7fc;
     }
 
@@ -173,80 +173,104 @@
       transform: translateX(-3px);
     }
 
-    /* Game 1: 15-Box X/O Game (3 rows x 5 columns: 5 5 5) */
-    .xo-board {
-      display: grid;
-      grid-template-columns: repeat(5, 80px);
-      grid-template-rows: repeat(3, 80px);
-      gap: 12px;
-      margin: 1.2rem 0;
-    }
-
-    .xo-box {
-      width: 80px;
-      height: 80px;
-      background: linear-gradient(145deg, #18181c, #0e0e12);
+    /* Calculation Challenge Card Layout */
+    .calc-card {
+      background: linear-gradient(145deg, #121216, #1a1a24);
       border: 1px solid #333;
-      border-radius: 12px;
+      border-radius: 16px;
+      padding: 2rem;
+      width: 450px;
       display: flex;
-      justify-content: center;
+      flex-direction: column;
       align-items: center;
-      font-size: 2.8rem;
-      font-weight: bold;
-      cursor: pointer;
-      transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-      box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
     }
 
-    .xo-box:hover {
-      background: #22222a;
-      border-color: #00d2ff;
-      transform: translateY(-2px);
-      box-shadow: 0 6px 15px rgba(0, 210, 255, 0.15);
+    .timer-container {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      padding-bottom: 0.8rem;
+      border-bottom: 1px solid #333;
     }
 
-    .xo-box.X {
-      color: #007bff; /* Blue */
-      text-shadow: 0 0 10px rgba(0, 123, 255, 0.7);
+    .timer-badge {
+      background: #222;
+      border: 1px solid #00d2ff;
+      color: #00d2ff;
+      padding: 0.4rem 1rem;
+      font-size: 1.2rem;
+      font-weight: 700;
+      border-radius: 20px;
+      box-shadow: 0 0 10px rgba(0, 210, 255, 0.2);
     }
 
-    .xo-box.O {
-      color: #ffeb3b; /* Yellow */
-      text-shadow: 0 0 10px rgba(255, 235, 59, 0.7);
+    .round-badge {
+      font-size: 1.1rem;
+      color: #aaa;
+      font-weight: 600;
     }
 
-    .xo-box.winning {
-      animation: winGlow 0.6s infinite alternate;
+    .problem-box {
+      font-size: 3.2rem;
+      font-weight: 800;
+      letter-spacing: 3px;
+      margin: 1rem 0 1.5rem 0;
+      color: #fff;
+      text-shadow: 0 0 15px rgba(255, 255, 255, 0.4);
     }
 
-    @keyframes winGlow {
-      0% {
-        transform: scale(1);
-        box-shadow: 0 0 10px #fff;
-      }
-      100% {
-        transform: scale(1.1);
-        box-shadow: 0 0 25px #00e5ff, 0 0 35px #ffeb3b;
-      }
-    }
-
-    .status-text {
-      font-size: 1.3rem;
-      margin-bottom: 0.8rem;
-      min-height: 1.8rem;
-    }
-
-    .winner-banner {
+    .calc-input {
+      width: 100%;
+      padding: 0.8rem;
       font-size: 2rem;
-      font-weight: bold;
-      margin-bottom: 1rem;
-      animation: popWin 0.5s ease-out forwards;
+      text-align: center;
+      background: #08080c;
+      border: 2px solid #444;
+      border-radius: 10px;
+      color: #fff;
+      margin-bottom: 1.2rem;
+      outline: none;
+      transition: border-color 0.2s;
     }
 
-    @keyframes popWin {
-      0% { transform: scale(0); opacity: 0; }
-      80% { transform: scale(1.2); }
-      100% { transform: scale(1); opacity: 1; }
+    .calc-input:focus {
+      border-color: #00d2ff;
+      box-shadow: 0 0 15px rgba(0, 210, 255, 0.3);
+    }
+
+    .calc-submit-btn {
+      width: 100%;
+      padding: 0.9rem;
+      font-size: 1.2rem;
+      font-weight: bold;
+      background: #007bff;
+      border: none;
+      border-radius: 10px;
+      color: #fff;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .calc-submit-btn:hover {
+      background: #0056b3;
+    }
+
+    .feedback-msg {
+      margin-top: 1rem;
+      font-size: 1.1rem;
+      min-height: 1.5rem;
+      font-weight: bold;
+    }
+
+    .feedback-msg.correct {
+      color: #4caf50;
+    }
+
+    .feedback-msg.wrong {
+      color: #f44336;
     }
 
     /* Game 2: Snake Runner */
@@ -270,17 +294,31 @@
   <!-- Screen 2: Menu -->
   <div id="menu-screen" class="screen">
     <h2>Select Game</h2>
-    <button class="menu-btn" id="btn-game1">1. 15-Box X/O Game</button>
+    <button class="menu-btn" id="btn-game1">1. Calculation Speed Challenge</button>
     <button class="menu-btn" id="btn-game2">2. Snake Tongue Runner</button>
   </div>
 
-  <!-- Screen 3: 15-Box X/O Game -->
-  <div id="xo-screen" class="screen">
-    <button class="back-btn" onclick="showScreen('menu-screen')">&larr; Menu</button>
-    <h2>15-Box X/O Game (5x3)</h2>
-    <div class="status-text" id="xo-status">Turn: Blue X</div>
-    <div class="xo-board" id="xo-board"></div>
-    <button class="menu-btn" id="xo-retry-btn" style="width: auto; padding: 0.8rem 2rem; display: inline-block;" onclick="resetXO()">Retry Game</button>
+  <!-- Screen 3: Calculation Game -->
+  <div id="calc-screen" class="screen">
+    <button class="back-btn" onclick="exitCalcGame()">&larr; Menu</button>
+
+    <div class="calc-card">
+      <div class="timer-container">
+        <div class="round-badge" id="calc-round">Round: 1 / Score: 0</div>
+        <div class="timer-badge" id="calc-timer">⏱️ 60s</div>
+      </div>
+
+      <div class="problem-box" id="calc-problem">12 + 34</div>
+
+      <form id="calc-form" onsubmit="submitCalcAnswer(event)" style="width: 100%;">
+        <input type="number" id="calc-answer" class="calc-input" placeholder="Your Answer" autocomplete="off" autofocus>
+        <button type="submit" class="calc-submit-btn">Submit Answer</button>
+      </form>
+
+      <div class="feedback-msg" id="calc-feedback"></div>
+
+      <button class="menu-btn" id="calc-retry-btn" style="width: 100%; margin: 15px 0 0 0; padding: 0.8rem; display: none;" onclick="startCalcGame()">Retry Game</button>
+    </div>
   </div>
 
   <!-- Screen 4: Snake Runner -->
@@ -317,8 +355,8 @@
     });
 
     document.getElementById('btn-game1').addEventListener('click', () => {
-      showScreen('xo-screen');
-      resetXO();
+      showScreen('calc-screen');
+      startCalcGame();
     });
 
     document.getElementById('btn-game2').addEventListener('click', () => {
@@ -326,121 +364,130 @@
       startSnakeGame();
     });
 
-    // --- Game 1: 15-Box X/O Game (3 rows x 5 columns: 5 5 5) ---
-    const rows = 3;
-    const cols = 5;
-    let xoState = Array(15).fill("");
-    let xoCurrentPlayer = "X";
-    let xoGameActive = true;
+    // --- Game 1: Calculation Speed Challenge ---
+    let calcScore = 0;
+    let calcRound = 1;
+    let calcTimeLeft = 60;
+    let calcTimerInterval = null;
+    let currentProblemAnswer = 0;
+    let isCalcActive = false;
 
-    // Build winning combinations dynamically for 3 in a row
-    const winningCombos = [];
+    function startCalcGame() {
+      calcScore = 0;
+      calcRound = 1;
+      calcTimeLeft = 60;
+      isCalcActive = true;
 
-    // Horizontal 3-in-a-row
-    for (let r = 0; r < rows; r++) {
-      for (let c = 0; c <= cols - 3; c++) {
-        const idx = r * cols + c;
-        winningCombos.push([idx, idx + 1, idx + 2]);
-      }
+      document.getElementById('calc-retry-btn').style.display = 'none';
+      document.getElementById('calc-answer').disabled = false;
+      document.getElementById('calc-answer').value = '';
+      document.getElementById('calc-feedback').textContent = '';
+      document.getElementById('calc-feedback').className = 'feedback-msg';
+
+      updateCalcUI();
+      generateCalcProblem();
+
+      if (calcTimerInterval) clearInterval(calcTimerInterval);
+      calcTimerInterval = setInterval(() => {
+        calcTimeLeft--;
+        document.getElementById('calc-timer').textContent = `⏱️ ${calcTimeLeft}s`;
+        if (calcTimeLeft <= 0) {
+          endCalcGame("⏰ Time's Up!");
+        }
+      }, 1000);
+
+      setTimeout(() => document.getElementById('calc-answer').focus(), 100);
     }
 
-    // Vertical 3-in-a-row
-    for (let r = 0; r <= rows - 3; r++) {
-      for (let c = 0; c < cols; c++) {
-        const idx = r * cols + c;
-        winningCombos.push([idx, idx + cols, idx + cols * 2]);
-      }
+    function exitCalcGame() {
+      if (calcTimerInterval) clearInterval(calcTimerInterval);
+      showScreen('menu-screen');
     }
 
-    // Diagonal down-right 3-in-a-row
-    for (let r = 0; r <= rows - 3; r++) {
-      for (let c = 0; c <= cols - 3; c++) {
-        const idx = r * cols + c;
-        winningCombos.push([idx, idx + cols + 1, idx + (cols + 1) * 2]);
-      }
+    function updateCalcUI() {
+      document.getElementById('calc-round').textContent = `Round: ${calcRound} | Score: ${calcScore}`;
+      document.getElementById('calc-timer').textContent = `⏱️ ${calcTimeLeft}s`;
     }
 
-    // Diagonal down-left 3-in-a-row
-    for (let r = 0; r <= rows - 3; r++) {
-      for (let c = 2; c < cols; c++) {
-        const idx = r * cols + c;
-        winningCombos.push([idx, idx + cols - 1, idx + (cols - 1) * 2]);
-      }
-    }
+    function generateCalcProblem() {
+      let problemStr = "";
 
-    const xoBoardContainer = document.getElementById('xo-board');
-
-    function createXOBoard() {
-      xoBoardContainer.innerHTML = '';
-      for (let i = 0; i < 15; i++) {
-        const box = document.createElement('div');
-        box.className = 'xo-box';
-        box.setAttribute('data-index', i);
-        xoBoardContainer.appendChild(box);
-      }
-    }
-    createXOBoard();
-
-    function resetXO() {
-      xoState = Array(15).fill("");
-      xoCurrentPlayer = "X";
-      xoGameActive = true;
-      document.getElementById('xo-status').innerHTML = "Turn: <span style='color:#007bff;font-weight:bold;'>Blue X</span>";
-      document.querySelectorAll('.xo-box').forEach(box => {
-        box.textContent = "";
-        box.className = "xo-box";
-      });
-    }
-
-    xoBoardContainer.addEventListener('click', (e) => {
-      if (!xoGameActive) return;
-      const box = e.target;
-      if (!box.classList.contains('xo-box')) return;
-      const index = parseInt(box.getAttribute('data-index'));
-
-      if (xoState[index] !== "") return;
-
-      xoState[index] = xoCurrentPlayer;
-      box.textContent = xoCurrentPlayer;
-      box.classList.add(xoCurrentPlayer);
-
-      checkXOWin();
-    });
-
-    function checkXOWin() {
-      let winningIndices = null;
-
-      for (let combo of winningCombos) {
-        const [a, b, c] = combo;
-        if (xoState[a] && xoState[a] === xoState[b] && xoState[a] === xoState[c]) {
-          winningIndices = combo;
-          break;
+      if (calcRound <= 20) {
+        // First 20 rounds: Multiplications (2-digit * 1-digit) and Additions (2-digit + 2-digit)
+        const isMultiplication = Math.random() < 0.5;
+        if (isMultiplication) {
+          const num1 = Math.floor(Math.random() * 90) + 10; // 10-99
+          const num2 = Math.floor(Math.random() * 8) + 2;   // 2-9
+          currentProblemAnswer = num1 * num2;
+          problemStr = `${num1} × ${num2}`;
+        } else {
+          const num1 = Math.floor(Math.random() * 90) + 10; // 10-99
+          const num2 = Math.floor(Math.random() * 90) + 10; // 10-99
+          currentProblemAnswer = num1 + num2;
+          problemStr = `${num1} + ${num2}`;
+        }
+      } else {
+        // After 20 rounds: Subtractions included
+        const randType = Math.floor(Math.random() * 3);
+        if (randType === 0) { // Multiplication
+          const num1 = Math.floor(Math.random() * 90) + 10;
+          const num2 = Math.floor(Math.random() * 8) + 2;
+          currentProblemAnswer = num1 * num2;
+          problemStr = `${num1} × ${num2}`;
+        } else if (randType === 1) { // Addition
+          const num1 = Math.floor(Math.random() * 90) + 10;
+          const num2 = Math.floor(Math.random() * 90) + 10;
+          currentProblemAnswer = num1 + num2;
+          problemStr = `${num1} + ${num2}`;
+        } else { // Subtraction
+          const num1 = Math.floor(Math.random() * 90) + 10;
+          const num2 = Math.floor(Math.random() * (num1 - 9)) + 10; // ensure positive result
+          currentProblemAnswer = num1 - num2;
+          problemStr = `${num1} − ${num2}`;
         }
       }
 
-      if (winningIndices) {
-        xoGameActive = false;
-        winningIndices.forEach(idx => {
-          const b = xoBoardContainer.querySelector(`[data-index="${idx}"]`);
-          if (b) b.classList.add('winning');
-        });
+      document.getElementById('calc-problem').textContent = problemStr;
+    }
 
-        const winnerColor = xoCurrentPlayer === "X" ? "#007bff" : "#ffeb3b";
-        const winnerName = xoCurrentPlayer === "X" ? "Blue X" : "Yellow O";
-        document.getElementById('xo-status').innerHTML = `<div class="winner-banner" style="color:${winnerColor};">🎉 ${winnerName} Wins! 🎉</div>`;
-        return;
+    function submitCalcAnswer(e) {
+      e.preventDefault();
+      if (!isCalcActive) return;
+
+      const userAnsInput = document.getElementById('calc-answer');
+      const userAns = parseInt(userAnsInput.value);
+
+      if (isNaN(userAns)) return;
+
+      const feedback = document.getElementById('calc-feedback');
+
+      if (userAns === currentProblemAnswer) {
+        calcScore += 10;
+        calcRound += 1;
+        feedback.textContent = "✓ Correct!";
+        feedback.className = "feedback-msg correct";
+      } else {
+        feedback.textContent = `✗ Wrong! Answer was ${currentProblemAnswer}`;
+        feedback.className = "feedback-msg wrong";
+        calcRound += 1;
       }
 
-      if (!xoState.includes("")) {
-        xoGameActive = false;
-        document.getElementById('xo-status').innerHTML = "<div class='winner-banner' style='color:#aaa;'>It's a Draw!</div>";
-        return;
-      }
+      userAnsInput.value = '';
+      updateCalcUI();
+      generateCalcProblem();
+      userAnsInput.focus();
+    }
 
-      xoCurrentPlayer = xoCurrentPlayer === "X" ? "O" : "X";
-      const nextColor = xoCurrentPlayer === "X" ? "#007bff" : "#ffeb3b";
-      const nextName = xoCurrentPlayer === "X" ? "Blue X" : "Yellow O";
-      document.getElementById('xo-status').innerHTML = `Turn: <span style="color:${nextColor};font-weight:bold;">${nextName}</span>`;
+    function endCalcGame(reason) {
+      isCalcActive = false;
+      if (calcTimerInterval) clearInterval(calcTimerInterval);
+
+      document.getElementById('calc-answer').disabled = true;
+      document.getElementById('calc-retry-btn').style.display = 'block';
+
+      const feedback = document.getElementById('calc-feedback');
+      feedback.textContent = `${reason} Final Score: ${calcScore} (${calcRound - 1} Rounds Solved)`;
+      feedback.className = "feedback-msg";
     }
 
     // --- Game 2: Headless Snake Tongue Runner ---
