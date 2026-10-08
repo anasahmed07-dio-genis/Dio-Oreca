@@ -88,6 +88,16 @@
       50% { opacity: 1; transform: scale(1.02); }
     }
 
+    .author-credit {
+      position: absolute;
+      bottom: 20px;
+      right: 25px;
+      font-size: 1.1rem;
+      color: #888;
+      font-weight: 500;
+      letter-spacing: 1px;
+    }
+
     /* Main Menu */
     h2 {
       font-size: 2.5rem;
@@ -132,28 +142,28 @@
       color: #fff;
     }
 
-    /* Game 1: 6-Box X/O */
+    /* Game 1: 18-Box X/O Game (6 columns x 3 rows or 3 columns x 6 rows) */
     .xo-board {
       display: grid;
-      grid-template-columns: repeat(3, 100px);
-      grid-template-rows: repeat(2, 100px);
-      gap: 15px;
-      margin: 1.5rem 0;
+      grid-template-columns: repeat(6, 75px);
+      grid-template-rows: repeat(3, 75px);
+      gap: 10px;
+      margin: 1.2rem 0;
     }
 
     .xo-box {
-      width: 100px;
-      height: 100px;
+      width: 75px;
+      height: 75px;
       background: #111;
       border: 2px solid #333;
       border-radius: 8px;
       display: flex;
       justify-content: center;
       align-items: center;
-      font-size: 3.5rem;
+      font-size: 2.5rem;
       font-weight: bold;
       cursor: pointer;
-      transition: background 0.2s;
+      transition: all 0.2s;
     }
 
     .xo-box:hover {
@@ -171,10 +181,38 @@
       text-shadow: 0 0 10px rgba(255, 235, 59, 0.7);
     }
 
+    .xo-box.winning {
+      animation: winGlow 0.6s infinite alternate;
+    }
+
+    @keyframes winGlow {
+      0% {
+        transform: scale(1);
+        box-shadow: 0 0 10px #fff;
+      }
+      100% {
+        transform: scale(1.1);
+        box-shadow: 0 0 25px #00e5ff, 0 0 35px #ffeb3b;
+      }
+    }
+
     .status-text {
       font-size: 1.3rem;
-      margin-bottom: 1rem;
+      margin-bottom: 0.8rem;
       min-height: 1.8rem;
+    }
+
+    .winner-banner {
+      font-size: 2rem;
+      font-weight: bold;
+      margin-bottom: 1rem;
+      animation: popWin 0.5s ease-out forwards;
+    }
+
+    @keyframes popWin {
+      0% { transform: scale(0); opacity: 0; }
+      80% { transform: scale(1.2); }
+      100% { transform: scale(1); opacity: 1; }
     }
 
     /* Game 2: Snake Runner */
@@ -191,29 +229,23 @@
   <div id="intro-screen" class="screen active">
     <div class="title-container" id="title-container"></div>
     <div class="start-prompt">(Start the game)</div>
+    <div class="author-credit">By Anas Ahmed.</div>
   </div>
 
   <!-- Screen 2: Menu -->
   <div id="menu-screen" class="screen">
     <h2>Select Game</h2>
-    <button class="menu-btn" id="btn-game1">1. 6-Box X/O Game</button>
+    <button class="menu-btn" id="btn-game1">1. 18-Box X/O Game</button>
     <button class="menu-btn" id="btn-game2">2. Snake Tongue Runner</button>
   </div>
 
-  <!-- Screen 3: 6-Box X/O Game -->
+  <!-- Screen 3: 18-Box X/O Game -->
   <div id="xo-screen" class="screen">
     <button class="back-btn" onclick="showScreen('menu-screen')">&larr; Menu</button>
-    <h2>6-Box X/O Game</h2>
+    <h2>18-Box X/O Game</h2>
     <div class="status-text" id="xo-status">Turn: Blue X</div>
-    <div class="xo-board" id="xo-board">
-      <div class="xo-box" data-index="0"></div>
-      <div class="xo-box" data-index="1"></div>
-      <div class="xo-box" data-index="2"></div>
-      <div class="xo-box" data-index="3"></div>
-      <div class="xo-box" data-index="4"></div>
-      <div class="xo-box" data-index="5"></div>
-    </div>
-    <button class="menu-btn" style="width: auto; padding: 0.5rem 1.5rem;" onclick="resetXO()">Restart Game</button>
+    <div class="xo-board" id="xo-board"></div>
+    <button class="menu-btn" id="xo-retry-btn" style="width: auto; padding: 0.6rem 1.8rem; display: inline-block;" onclick="resetXO()">Retry Game</button>
   </div>
 
   <!-- Screen 4: Snake Runner -->
@@ -258,28 +290,73 @@
       startSnakeGame();
     });
 
-    // --- Game 1: 6-Box X/O Game ---
-    let xoState = ["", "", "", "", "", ""];
+    // --- Game 1: 18-Box X/O Game (3 rows x 6 columns) ---
+    const rows = 3;
+    const cols = 6;
+    let xoState = Array(18).fill("");
     let xoCurrentPlayer = "X";
     let xoGameActive = true;
 
-    const winningCombos = [
-      [0, 1, 2], [3, 4, 5], // rows
-      [0, 3], [1, 4], [2, 5] // columns
-    ];
+    // Build winning combinations dynamically for 3 in a row
+    const winningCombos = [];
+
+    // Horizontal 3-in-a-row
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c <= cols - 3; c++) {
+        const idx = r * cols + c;
+        winningCombos.push([idx, idx + 1, idx + 2]);
+      }
+    }
+
+    // Vertical 3-in-a-row
+    for (let r = 0; r <= rows - 3; r++) {
+      for (let c = 0; c < cols; c++) {
+        const idx = r * cols + c;
+        winningCombos.push([idx, idx + cols, idx + cols * 2]);
+      }
+    }
+
+    // Diagonal down-right 3-in-a-row
+    for (let r = 0; r <= rows - 3; r++) {
+      for (let c = 0; c <= cols - 3; c++) {
+        const idx = r * cols + c;
+        winningCombos.push([idx, idx + cols + 1, idx + (cols + 1) * 2]);
+      }
+    }
+
+    // Diagonal down-left 3-in-a-row
+    for (let r = 0; r <= rows - 3; r++) {
+      for (let c = 2; c < cols; c++) {
+        const idx = r * cols + c;
+        winningCombos.push([idx, idx + cols - 1, idx + (cols - 1) * 2]);
+      }
+    }
+
+    const xoBoardContainer = document.getElementById('xo-board');
+
+    function createXOBoard() {
+      xoBoardContainer.innerHTML = '';
+      for (let i = 0; i < 18; i++) {
+        const box = document.createElement('div');
+        box.className = 'xo-box';
+        box.setAttribute('data-index', i);
+        xoBoardContainer.appendChild(box);
+      }
+    }
+    createXOBoard();
 
     function resetXO() {
-      xoState = ["", "", "", "", "", ""];
+      xoState = Array(18).fill("");
       xoCurrentPlayer = "X";
       xoGameActive = true;
-      document.getElementById('xo-status').textContent = "Turn: Blue X";
+      document.getElementById('xo-status').innerHTML = "Turn: <span style='color:#007bff;font-weight:bold;'>Blue X</span>";
       document.querySelectorAll('.xo-box').forEach(box => {
         box.textContent = "";
         box.className = "xo-box";
       });
     }
 
-    document.getElementById('xo-board').addEventListener('click', (e) => {
+    xoBoardContainer.addEventListener('click', (e) => {
       if (!xoGameActive) return;
       const box = e.target;
       if (!box.classList.contains('xo-box')) return;
@@ -295,38 +372,39 @@
     });
 
     function checkXOWin() {
-      let won = false;
+      let winningIndices = null;
+
       for (let combo of winningCombos) {
-        if (combo.length === 3) {
-          const [a, b, c] = combo;
-          if (xoState[a] && xoState[a] === xoState[b] && xoState[a] === xoState[c]) {
-            won = true;
-            break;
-          }
-        } else if (combo.length === 2) {
-          const [a, b] = combo;
-          if (xoState[a] && xoState[a] === xoState[b]) {
-            won = true;
-            break;
-          }
+        const [a, b, c] = combo;
+        if (xoState[a] && xoState[a] === xoState[b] && xoState[a] === xoState[c]) {
+          winningIndices = combo;
+          break;
         }
       }
 
-      if (won) {
+      if (winningIndices) {
         xoGameActive = false;
-        const winner = xoCurrentPlayer === "X" ? "Blue X" : "Yellow O";
-        document.getElementById('xo-status').textContent = `🎉 ${winner} Wins!`;
+        winningIndices.forEach(idx => {
+          const b = xoBoardContainer.querySelector(`[data-index="${idx}"]`);
+          if (b) b.classList.add('winning');
+        });
+
+        const winnerColor = xoCurrentPlayer === "X" ? "#007bff" : "#ffeb3b";
+        const winnerName = xoCurrentPlayer === "X" ? "Blue X" : "Yellow O";
+        document.getElementById('xo-status').innerHTML = `<div class="winner-banner" style="color:${winnerColor};">🎉 ${winnerName} Wins! 🎉</div>`;
         return;
       }
 
       if (!xoState.includes("")) {
         xoGameActive = false;
-        document.getElementById('xo-status').textContent = "It's a Draw!";
+        document.getElementById('xo-status').innerHTML = "<div class='winner-banner' style='color:#aaa;'>It's a Draw!</div>";
         return;
       }
 
       xoCurrentPlayer = xoCurrentPlayer === "X" ? "O" : "X";
-      document.getElementById('xo-status').textContent = `Turn: ${xoCurrentPlayer === 'X' ? 'Blue X' : 'Yellow O'}`;
+      const nextColor = xoCurrentPlayer === "X" ? "#007bff" : "#ffeb3b";
+      const nextName = xoCurrentPlayer === "X" ? "Blue X" : "Yellow O";
+      document.getElementById('xo-status').innerHTML = `Turn: <span style="color:${nextColor};font-weight:bold;">${nextName}</span>`;
     }
 
     // --- Game 2: Headless Snake Tongue Runner ---
