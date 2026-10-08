@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DIO-ORECA</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+    body {
+      background-color: #000;
+      color: #fff;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .screen {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+
+    .screen.active {
+      display: flex;
+    }
+
+    /* Intro Screen */
+    #intro-screen {
+      cursor: pointer;
+    }
+
+    .title-container {
+      display: flex;
+      font-size: 4rem;
+      font-weight: 800;
+      letter-spacing: 5px;
+      margin-bottom: 2rem;
+    }
+
+    .letter {
+      display: inline-block;
+      opacity: 0;
+      transform: scale(3) rotate(15deg);
+      animation: burstIn 0.8s forwards cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    @keyframes burstIn {
+      0% {
+        opacity: 0;
+        transform: scale(4) translate(-50px, -50px) rotate(-30deg);
+        filter: blur(10px);
+      }
+      50% {
+        opacity: 0.8;
+        filter: blur(2px);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1) translate(0, 0) rotate(0deg);
+        filter: blur(0);
+        text-shadow: 0 0 15px rgba(255, 255, 255, 0.8), 0 0 30px rgba(0, 150, 255, 0.6);
+      }
+    }
+
+    .start-prompt {
+      font-size: 1.5rem;
+      color: #aaa;
+      animation: pulse 1.5s infinite;
+      margin-top: 1rem;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.3; transform: scale(0.98); }
+      50% { opacity: 1; transform: scale(1.02); }
+    }
+
+    /* Main Menu */
+    h2 {
+      font-size: 2.5rem;
+      margin-bottom: 2rem;
+      text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+    }
+
+    .menu-btn {
+      background: #111;
+      border: 2px solid #444;
+      color: #fff;
+      padding: 1rem 2rem;
+      font-size: 1.2rem;
+      margin: 0.8rem;
+      border-radius: 8px;
+      cursor: pointer;
+      width: 280px;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+    }
+
+    .menu-btn:hover {
+      background: #222;
+      border-color: #00d2ff;
+      transform: translateY(-2px);
+      box-shadow: 0 0 15px rgba(0, 210, 255, 0.4);
+    }
+
+    .back-btn {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      background: transparent;
+      border: 1px solid #555;
+      color: #ccc;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .back-btn:hover {
+      border-color: #fff;
+      color: #fff;
+    }
+
+    /* Game 1: 6-Box X/O */
+    .xo-board {
+      display: grid;
+      grid-template-columns: repeat(3, 100px);
+      grid-template-rows: repeat(2, 100px);
+      gap: 15px;
+      margin: 1.5rem 0;
+    }
+
+    .xo-box {
+      width: 100px;
+      height: 100px;
+      background: #111;
+      border: 2px solid #333;
+      border-radius: 8px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 3.5rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .xo-box:hover {
+      background: #1a1a1a;
+      border-color: #555;
+    }
+
+    .xo-box.X {
+      color: #007bff; /* Blue */
+      text-shadow: 0 0 10px rgba(0, 123, 255, 0.7);
+    }
+
+    .xo-box.O {
+      color: #ffeb3b; /* Yellow */
+      text-shadow: 0 0 10px rgba(255, 235, 59, 0.7);
+    }
+
+    .status-text {
+      font-size: 1.3rem;
+      margin-bottom: 1rem;
+      min-height: 1.8rem;
+    }
+
+    /* Game 2: Snake Runner */
+    #snake-canvas {
+      background: #0d0d0d;
+      border: 2px solid #333;
+      box-shadow: 0 0 20px rgba(0,255,200,0.1);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Screen 1: Intro -->
+  <div id="intro-screen" class="screen active">
+    <div class="title-container" id="title-container"></div>
+    <div class="start-prompt">(Start the game)</div>
+  </div>
+
+  <!-- Screen 2: Menu -->
+  <div id="menu-screen" class="screen">
+    <h2>Select Game</h2>
+    <button class="menu-btn" id="btn-game1">1. 6-Box X/O Game</button>
+    <button class="menu-btn" id="btn-game2">2. Snake Tongue Runner</button>
+  </div>
+
+  <!-- Screen 3: 6-Box X/O Game -->
+  <div id="xo-screen" class="screen">
+    <button class="back-btn" onclick="showScreen('menu-screen')">&larr; Menu</button>
+    <h2>6-Box X/O Game</h2>
+    <div class="status-text" id="xo-status">Turn: Blue X</div>
+    <div class="xo-board" id="xo-board">
+      <div class="xo-box" data-index="0"></div>
+      <div class="xo-box" data-index="1"></div>
+      <div class="xo-box" data-index="2"></div>
+      <div class="xo-box" data-index="3"></div>
+      <div class="xo-box" data-index="4"></div>
+      <div class="xo-box" data-index="5"></div>
+    </div>
+    <button class="menu-btn" style="width: auto; padding: 0.5rem 1.5rem;" onclick="resetXO()">Restart Game</button>
+  </div>
+
+  <!-- Screen 4: Snake Runner -->
+  <div id="snake-screen" class="screen">
+    <button class="back-btn" onclick="exitSnakeGame()">&larr; Menu</button>
+    <h2>Tongue Runner</h2>
+    <div class="status-text" id="snake-status">Score: 0</div>
+    <canvas id="snake-canvas" width="400" height="400"></canvas>
+    <div style="margin-top: 10px; color: #777; font-size: 0.9rem;">Use Arrow Keys or WASD to turn</div>
+  </div>
+
+  <script>
+    // --- Navigation & Flow ---
+    const titleText = "DIO-ORECA";
+    const titleContainer = document.getElementById('title-container');
+
+    // Create burst animated letters
+    titleText.split('').forEach((char, index) => {
+      const span = document.createElement('span');
+      span.className = 'letter';
+      span.textContent = char === ' ' ? '\u00A0' : char;
+      span.style.animationDelay = `${index * 0.1}s`;
+      titleContainer.appendChild(span);
+    });
+
+    function showScreen(screenId) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById(screenId).classList.add('active');
+    }
+
+    document.getElementById('intro-screen').addEventListener('click', () => {
+      showScreen('menu-screen');
+    });
+
+    document.getElementById('btn-game1').addEventListener('click', () => {
+      showScreen('xo-screen');
+      resetXO();
+    });
+
+    document.getElementById('btn-game2').addEventListener('click', () => {
+      showScreen('snake-screen');
+      startSnakeGame();
+    });
+
+    // --- Game 1: 6-Box X/O Game ---
+    let xoState = ["", "", "", "", "", ""];
+    let xoCurrentPlayer = "X";
+    let xoGameActive = true;
+
+    const winningCombos = [
+      [0, 1, 2], [3, 4, 5], // rows
+      [0, 3], [1, 4], [2, 5] // columns
+    ];
+
+    function resetXO() {
+      xoState = ["", "", "", "", "", ""];
+      xoCurrentPlayer = "X";
+      xoGameActive = true;
+      document.getElementById('xo-status').textContent = "Turn: Blue X";
+      document.querySelectorAll('.xo-box').forEach(box => {
+        box.textContent = "";
+        box.className = "xo-box";
+      });
+    }
+
+    document.getElementById('xo-board').addEventListener('click', (e) => {
+      if (!xoGameActive) return;
+      const box = e.target;
+      if (!box.classList.contains('xo-box')) return;
+      const index = parseInt(box.getAttribute('data-index'));
+
+      if (xoState[index] !== "") return;
+
+      xoState[index] = xoCurrentPlayer;
+      box.textContent = xoCurrentPlayer;
+      box.classList.add(xoCurrentPlayer);
+
+      checkXOWin();
+    });
+
+    function checkXOWin() {
+      let won = false;
+      for (let combo of winningCombos) {
+        if (combo.length === 3) {
+          const [a, b, c] = combo;
+          if (xoState[a] && xoState[a] === xoState[b] && xoState[a] === xoState[c]) {
+            won = true;
+            break;
+          }
+        } else if (combo.length === 2) {
+          const [a, b] = combo;
+          if (xoState[a] && xoState[a] === xoState[b]) {
+            won = true;
+            break;
+          }
+        }
+      }
+
+      if (won) {
+        xoGameActive = false;
+        const winner = xoCurrentPlayer === "X" ? "Blue X" : "Yellow O";
+        document.getElementById('xo-status').textContent = `🎉 ${winner} Wins!`;
+        return;
+      }
+
+      if (!xoState.includes("")) {
+        xoGameActive = false;
+        document.getElementById('xo-status').textContent = "It's a Draw!";
+        return;
+      }
+
+      xoCurrentPlayer = xoCurrentPlayer === "X" ? "O" : "X";
+      document.getElementById('xo-status').textContent = `Turn: ${xoCurrentPlayer === 'X' ? 'Blue X' : 'Yellow O'}`;
+    }
+
+    // --- Game 2: Headless Snake Tongue Runner ---
+    const canvas = document.getElementById('snake-canvas');
+    const ctx = canvas.getContext('2d');
+    const gridSize = 20;
+    const tileCount = canvas.width / gridSize;
+
+    let snake = [];
+    let food = { x: 10, y: 10 };
+    let dx = 1, dy = 0;
+    let score = 0;
+    let snakeInterval = null;
+    let isSnakeGameOver = false;
+
+    function startSnakeGame() {
+      snake = [
+        { x: 5, y: 10 },
+        { x: 4, y: 10 },
+        { x: 3, y: 10 }
+      ];
+      dx = 1; dy = 0;
+      score = 0;
+      isSnakeGameOver = false;
+      document.getElementById('snake-status').textContent = "Score: 0";
+      spawnFood();
+      if (snakeInterval) clearInterval(snakeInterval);
+      snakeInterval = setInterval(updateSnake, 120);
+    }
+
+    function exitSnakeGame() {
+      if (snakeInterval) clearInterval(snakeInterval);
+      showScreen('menu-screen');
+    }
+
+    function spawnFood() {
+      food = {
+        x: Math.floor(Math.random() * tileCount),
+        y: Math.floor(Math.random() * tileCount)
+      };
+    }
+
+    function updateSnake() {
+      if (isSnakeGameOver) return;
+
+      const head = { x: snake[0].x + dx, y: snake[0].y + dy };
+
+      // Wall collision
+      if (head.x < 0 || head.x >= tileCount || head.y < 0 || head.y >= tileCount) {
+        triggerSnakeGameOver();
+        return;
+      }
+
+      // Self collision
+      for (let i = 0; i < snake.length; i++) {
+        if (snake[i].x === head.x && snake[i].y === head.y) {
+          triggerSnakeGameOver();
+          return;
+        }
+      }
+
+      snake.unshift(head);
+
+      // Eat food
+      if (head.x === food.x && head.y === food.y) {
+        score += 10;
+        document.getElementById('snake-status').textContent = `Score: ${score}`;
+        spawnFood();
+      } else {
+        snake.pop();
+      }
+
+      drawSnakeGame();
+    }
+
+    function triggerSnakeGameOver() {
+      isSnakeGameOver = true;
+      document.getElementById('snake-status').textContent = `Game Over! Final Score: ${score} (Click Menu to restart)`;
+    }
+
+    function drawSnakeGame() {
+      // Clear background
+      ctx.fillStyle = '#0d0d0d';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Draw Grid lines lightly
+      ctx.strokeStyle = '#1a1a1a';
+      for (let i = 0; i < canvas.width; i += gridSize) {
+        ctx.beginPath();
+        ctx.moveTo(i, 0); ctx.lineTo(i, canvas.height);
+        ctx.moveTo(0, i); ctx.lineTo(canvas.width, i);
+        ctx.stroke();
+      }
+
+      // Draw Food
+      ctx.fillStyle = '#ff3366';
+      ctx.beginPath();
+      ctx.arc((food.x + 0.5) * gridSize, (food.y + 0.5) * gridSize, gridSize / 2 - 2, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Draw Headless Snake with Forked Tongue
+      snake.forEach((segment, index) => {
+        const x = segment.x * gridSize;
+        const y = segment.y * gridSize;
+
+        if (index === 0) {
+          // Front neck / tongue segment
+          ctx.fillStyle = '#4caf50';
+          ctx.fillRect(x + 2, y + 2, gridSize - 4, gridSize - 4);
+
+          // Draw Forked Tongue extending forward
+          ctx.strokeStyle = '#ff1744';
+          ctx.lineWidth = 3;
+          ctx.beginPath();
+
+          let centerX = x + gridSize / 2;
+          let centerY = y + gridSize / 2;
+
+          if (dx === 1) { // right
+            ctx.moveTo(x + gridSize, centerY);
+            ctx.lineTo(x + gridSize + 10, centerY);
+            ctx.lineTo(x + gridSize + 14, centerY - 4);
+            ctx.moveTo(x + gridSize + 10, centerY);
+            ctx.lineTo(x + gridSize + 14, centerY + 4);
+          } else if (dx === -1) { // left
+            ctx.moveTo(x, centerY);
+            ctx.lineTo(x - 10, centerY);
+            ctx.lineTo(x - 14, centerY - 4);
+            ctx.moveTo(x - 10, centerY);
+            ctx.lineTo(x - 14, centerY + 4);
+          } else if (dy === 1) { // down
+            ctx.moveTo(centerX, y + gridSize);
+            ctx.lineTo(centerX, y + gridSize + 10);
+            ctx.lineTo(centerX - 4, y + gridSize + 14);
+            ctx.moveTo(centerX, y + gridSize + 10);
+            ctx.lineTo(centerX + 4, y + gridSize + 14);
+          } else if (dy === -1) { // up
+            ctx.moveTo(centerX, y);
+            ctx.lineTo(centerX, y - 10);
+            ctx.lineTo(centerX - 4, y - 14);
+            ctx.moveTo(centerX, y - 10);
+            ctx.lineTo(centerX + 4, y - 14);
+          }
+          ctx.stroke();
+
+        } else {
+          // Body segments
+          ctx.fillStyle = '#2e7d32';
+          ctx.fillRect(x + 3, y + 3, gridSize - 6, gridSize - 6);
+        }
+      });
+    }
+
+    window.addEventListener('keydown', (e) => {
+      if (['ArrowUp', 'KeyW'].includes(e.code) && dy === 0) { dx = 0; dy = -1; }
+      else if (['ArrowDown', 'KeyS'].includes(e.code) && dy === 0) { dx = 0; dy = 1; }
+      else if (['ArrowLeft', 'KeyA'].includes(e.code) && dx === 0) { dx = -1; dy = 0; }
+      else if (['ArrowRight', 'KeyD'].includes(e.code) && dx === 0) { dx = 1; dy = 0; }
+    });
+  </script>
+</body>
+</html>
