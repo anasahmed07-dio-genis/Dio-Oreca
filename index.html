@@ -90,12 +90,25 @@
 
     .author-credit {
       position: absolute;
-      bottom: 20px;
-      right: 25px;
-      font-size: 1.1rem;
-      color: #888;
-      font-weight: 500;
-      letter-spacing: 1px;
+      bottom: 25px;
+      right: 30px;
+      font-size: 1.8rem;
+      font-weight: 800;
+      letter-spacing: 2px;
+      color: #00d2ff;
+      text-shadow: 0 0 8px #00d2ff, 0 0 20px #00d2ff, 0 0 30px #0088ff;
+      animation: neonPulse 2s infinite alternate ease-in-out;
+    }
+
+    @keyframes neonPulse {
+      0% {
+        text-shadow: 0 0 5px #00d2ff, 0 0 10px #00d2ff, 0 0 20px #0088ff;
+        transform: scale(0.98);
+      }
+      100% {
+        text-shadow: 0 0 10px #00d2ff, 0 0 25px #00d2ff, 0 0 40px #0088ff, 0 0 60px #0055ff;
+        transform: scale(1.03);
+      }
     }
 
     /* Main Menu */
@@ -142,25 +155,25 @@
       color: #fff;
     }
 
-    /* Game 1: 18-Box X/O Game (6 columns x 3 rows or 3 columns x 6 rows) */
+    /* Game 1: 15-Box X/O Game (3 rows x 5 columns: 5 5 5) */
     .xo-board {
       display: grid;
-      grid-template-columns: repeat(6, 75px);
-      grid-template-rows: repeat(3, 75px);
-      gap: 10px;
+      grid-template-columns: repeat(5, 80px);
+      grid-template-rows: repeat(3, 80px);
+      gap: 12px;
       margin: 1.2rem 0;
     }
 
     .xo-box {
-      width: 75px;
-      height: 75px;
+      width: 80px;
+      height: 80px;
       background: #111;
       border: 2px solid #333;
       border-radius: 8px;
       display: flex;
       justify-content: center;
       align-items: center;
-      font-size: 2.5rem;
+      font-size: 2.8rem;
       font-weight: bold;
       cursor: pointer;
       transition: all 0.2s;
@@ -235,14 +248,14 @@
   <!-- Screen 2: Menu -->
   <div id="menu-screen" class="screen">
     <h2>Select Game</h2>
-    <button class="menu-btn" id="btn-game1">1. 18-Box X/O Game</button>
+    <button class="menu-btn" id="btn-game1">1. 15-Box X/O Game</button>
     <button class="menu-btn" id="btn-game2">2. Snake Tongue Runner</button>
   </div>
 
-  <!-- Screen 3: 18-Box X/O Game -->
+  <!-- Screen 3: 15-Box X/O Game -->
   <div id="xo-screen" class="screen">
     <button class="back-btn" onclick="showScreen('menu-screen')">&larr; Menu</button>
-    <h2>18-Box X/O Game</h2>
+    <h2>15-Box X/O Game (5x3)</h2>
     <div class="status-text" id="xo-status">Turn: Blue X</div>
     <div class="xo-board" id="xo-board"></div>
     <button class="menu-btn" id="xo-retry-btn" style="width: auto; padding: 0.6rem 1.8rem; display: inline-block;" onclick="resetXO()">Retry Game</button>
@@ -255,6 +268,7 @@
     <div class="status-text" id="snake-status">Score: 0</div>
     <canvas id="snake-canvas" width="400" height="400"></canvas>
     <div style="margin-top: 10px; color: #777; font-size: 0.9rem;">Use Arrow Keys or WASD to turn</div>
+    <button class="menu-btn" id="snake-retry-btn" style="width: auto; padding: 0.6rem 1.8rem; margin-top: 15px;" onclick="startSnakeGame()">Retry Game</button>
   </div>
 
   <script>
@@ -290,10 +304,10 @@
       startSnakeGame();
     });
 
-    // --- Game 1: 18-Box X/O Game (3 rows x 6 columns) ---
+    // --- Game 1: 15-Box X/O Game (3 rows x 5 columns: 5 5 5) ---
     const rows = 3;
-    const cols = 6;
-    let xoState = Array(18).fill("");
+    const cols = 5;
+    let xoState = Array(15).fill("");
     let xoCurrentPlayer = "X";
     let xoGameActive = true;
 
@@ -336,7 +350,7 @@
 
     function createXOBoard() {
       xoBoardContainer.innerHTML = '';
-      for (let i = 0; i < 18; i++) {
+      for (let i = 0; i < 15; i++) {
         const box = document.createElement('div');
         box.className = 'xo-box';
         box.setAttribute('data-index', i);
@@ -346,7 +360,7 @@
     createXOBoard();
 
     function resetXO() {
-      xoState = Array(18).fill("");
+      xoState = Array(15).fill("");
       xoCurrentPlayer = "X";
       xoGameActive = true;
       document.getElementById('xo-status').innerHTML = "Turn: <span style='color:#007bff;font-weight:bold;'>Blue X</span>";
@@ -482,7 +496,7 @@
 
     function triggerSnakeGameOver() {
       isSnakeGameOver = true;
-      document.getElementById('snake-status').textContent = `Game Over! Final Score: ${score} (Click Menu to restart)`;
+      document.getElementById('snake-status').textContent = `Game Over! Final Score: ${score}`;
     }
 
     function drawSnakeGame() {
