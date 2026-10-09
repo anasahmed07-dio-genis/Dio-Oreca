@@ -191,10 +191,36 @@
       background: rgba(0, 210, 255, 0.1);
     }
 
+    .scores-dashboard {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-bottom: 0.8rem;
+      width: 100%;
+      max-width: 400px;
+      flex-wrap: wrap;
+    }
+
+    .score-badge {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 8px;
+      padding: 0.4rem 0.8rem;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #ddd;
+    }
+
+    .score-badge span {
+      color: #00d2ff;
+      font-weight: bold;
+    }
+
     .status-text {
       font-size: 1.3rem;
       margin-bottom: 0.8rem;
       min-height: 1.8rem;
+      text-align: center;
     }
 
     /* Mobile Controls for Snake Game */
@@ -268,7 +294,14 @@
   <div id="snake-screen" class="screen">
     <button class="back-btn" onclick="exitSnakeGame()">&larr; Menu</button>
     <h2>Tongue Runner</h2>
-    <div class="status-text" id="snake-status">Score: 0</div>
+
+    <div class="scores-dashboard">
+      <div class="score-badge">Score: <span id="snake-current-score">0</span></div>
+      <div class="score-badge">Previous: <span id="snake-prev-score">0</span></div>
+      <div class="score-badge">High Score: <span id="snake-high-score">0</span></div>
+    </div>
+
+    <div class="status-text" id="snake-status">Get ready!</div>
     <canvas id="snake-canvas" width="400" height="400"></canvas>
 
     <!-- Touch D-Pad for Mobile -->
@@ -325,8 +358,13 @@
     let dx = 1, dy = 0;
     let nextDx = 1, nextDy = 0;
     let score = 0;
+    let previousScore = 0;
+    let highScore = localStorage.getItem('dio_snake_highscore') ? parseInt(localStorage.getItem('dio_snake_highscore')) : 0;
     let snakeInterval = null;
     let isSnakeGameOver = false;
+
+    // Initialize UI Score Badges
+    document.getElementById('snake-high-score').textContent = highScore;
 
     function startSnakeGame() {
       snake = [
@@ -338,7 +376,12 @@
       nextDx = 1; nextDy = 0;
       score = 0;
       isSnakeGameOver = false;
-      document.getElementById('snake-status').textContent = "Score: 0";
+
+      document.getElementById('snake-current-score').textContent = score;
+      document.getElementById('snake-prev-score').textContent = previousScore;
+      document.getElementById('snake-high-score').textContent = highScore;
+      document.getElementById('snake-status').textContent = "Run for food!";
+
       spawnFood();
       if (snakeInterval) clearInterval(snakeInterval);
       snakeInterval = setInterval(updateSnake, 120);
@@ -383,7 +426,14 @@
       // Eat food
       if (head.x === food.x && head.y === food.y) {
         score += 10;
-        document.getElementById('snake-status').textContent = `Score: ${score}`;
+        document.getElementById('snake-current-score').textContent = score;
+
+        if (score > highScore) {
+          highScore = score;
+          localStorage.setItem('dio_snake_highscore', highScore);
+          document.getElementById('snake-high-score').textContent = highScore;
+        }
+
         spawnFood();
       } else {
         snake.pop();
@@ -394,6 +444,15 @@
 
     function triggerSnakeGameOver() {
       isSnakeGameOver = true;
+      previousScore = score;
+      document.getElementById('snake-prev-score').textContent = previousScore;
+
+      if (score > highScore) {
+        highScore = score;
+        localStorage.setItem('dio_snake_highscore', highScore);
+        document.getElementById('snake-high-score').textContent = highScore;
+      }
+
       document.getElementById('snake-status').textContent = `Game Over! Final Score: ${score} (Press Spacebar to retry)`;
     }
 
@@ -417,17 +476,21 @@
       ctx.arc((food.x + 0.5) * gridSize, (food.y + 0.5) * gridSize, gridSize / 2 - 2, 0, Math.PI * 2);
       ctx.fill();
 
-      // Determine Snake Skin Color based on Score:
-      // Score > 300: Blue skin
-      // Score > 100: Yellow skin
-      // Score <= 100: Default Green skin
+      // Determine Snake Skin Color based on Score progression:
+      // Score >= 400: Red skin
+      // Score >= 200: Blue skin
+      // Score >= 100: Yellow skin
+      // Score < 100: Green skin
       let neckColor = '#4caf50';
       let bodyColor = '#2e7d32';
 
-      if (score > 300) {
+      if (score >= 400) {
+        neckColor = '#ff3366';
+        bodyColor = '#d50000';
+      } else if (score >= 200) {
         neckColor = '#00d2ff';
         bodyColor = '#007bff';
-      } else if (score > 100) {
+      } else if (score >= 100) {
         neckColor = '#ffeb3b';
         bodyColor = '#fbc02d';
       }
