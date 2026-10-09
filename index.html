@@ -196,7 +196,7 @@
       gap: 15px;
       margin-bottom: 0.8rem;
       width: 100%;
-      max-width: 400px;
+      max-width: 420px;
       flex-wrap: wrap;
     }
 
@@ -384,6 +384,7 @@
     <h2>Tucky Car</h2>
 
     <div class="scores-dashboard">
+      <div class="score-badge">Lives: <span id="car-lives">❤️❤️❤️</span></div>
       <div class="score-badge">Score: <span id="car-current-score">0</span></div>
       <div class="score-badge">Previous: <span id="car-prev-score">0</span></div>
       <div class="score-badge">High Score: <span id="car-high-score">0</span></div>
@@ -586,17 +587,32 @@
       snakeCtx.fill();
 
       let neckColor = '#4caf50';
-      let bodyColor = '#2e7d32';
+      let bodyFill = '#2e7d32';
 
-      if (score >= 400) {
+      // Snake Body Colors & Gradients (includes Purple & Aurora Blue Gradients)
+      if (score >= 750) {
+        // Aurora Blue Gradient
+        neckColor = '#00f2fe';
+        let grad = snakeCtx.createLinearGradient(0, 0, snakeCanvas.width, snakeCanvas.height);
+        grad.addColorStop(0, '#00f2fe');
+        grad.addColorStop(1, '#4facfe');
+        bodyFill = grad;
+      } else if (score >= 500) {
+        // Purple Gradient
+        neckColor = '#e040fb';
+        let grad = snakeCtx.createLinearGradient(0, 0, snakeCanvas.width, snakeCanvas.height);
+        grad.addColorStop(0, '#9c27b0');
+        grad.addColorStop(1, '#e040fb');
+        bodyFill = grad;
+      } else if (score >= 400) {
         neckColor = '#ff3366';
-        bodyColor = '#d50000';
+        bodyFill = '#d50000';
       } else if (score >= 200) {
         neckColor = '#00d2ff';
-        bodyColor = '#007bff';
+        bodyFill = '#007bff';
       } else if (score >= 100) {
         neckColor = '#ffeb3b';
-        bodyColor = '#fbc02d';
+        bodyFill = '#fbc02d';
       }
 
       snake.forEach((segment, index) => {
@@ -641,7 +657,7 @@
           }
           snakeCtx.stroke();
         } else {
-          snakeCtx.fillStyle = bodyColor;
+          snakeCtx.fillStyle = bodyFill;
           snakeCtx.fillRect(x + 3, y + 3, gridSize - 6, gridSize - 6);
         }
       });
@@ -669,16 +685,22 @@
     let isCarGameOver = false;
     let roadOffset = 0;
 
+    // Hit / Health System
+    let carLives = 3;
+    let invulnerableTimer = 0; // Frames of temporary immunity after a hit
+    let hitTextTimer = 0; // Frames to display "HIT!" floating text
+    let hitSparkX = 0, hitSparkY = 0;
+
     document.getElementById('car-high-score').textContent = carHighScore;
 
     function drawCarPreviews() {
       const pTruck = document.getElementById('preview-truck').getContext('2d');
       pTruck.clearRect(0, 0, 70, 110);
-      drawRedPickupTruck(pTruck, 35, 55, 1);
+      drawRedPickupTruck(pTruck, 35, 55, 1, 0);
 
       const pSports = document.getElementById('preview-sports').getContext('2d');
       pSports.clearRect(0, 0, 70, 110);
-      drawWhiteSportsCar(pSports, 35, 55, 1);
+      drawWhiteSportsCar(pSports, 35, 55, 1, 0);
     }
 
     function selectCar(type) {
@@ -687,13 +709,24 @@
       startCarGame();
     }
 
+    function updateLivesUI() {
+      let hearts = "";
+      for (let i = 0; i < carLives; i++) hearts += "❤️";
+      if (carLives <= 0) hearts = "💀";
+      document.getElementById('car-lives').textContent = hearts;
+    }
+
     function startCarGame() {
       carLane = 1;
       obstacles = [];
       carScore = 0;
+      carLives = 3;
+      invulnerableTimer = 0;
+      hitTextTimer = 0;
       isCarGameOver = false;
 
-      document.getElementById('car-current-score').textContent = carScore;
+      updateLivesUI();
+      document.getElementById('car-current-score').textContent = 0;
       document.getElementById('car-prev-score').textContent = carPrevScore;
       document.getElementById('car-high-score').textContent = carHighScore;
       document.getElementById('car-status').textContent = "Dodge the obstacles!";
@@ -719,13 +752,17 @@
 
       roadOffset = (roadOffset + 8) % 40;
       carScore += 1;
-      document.getElementById('car-current-score').textContent = Math.floor(carScore / 5);
+      const displayScore = Math.floor(carScore / 5);
+      document.getElementById('car-current-score').textContent = displayScore;
 
-      if (Math.floor(carScore / 5) > carHighScore) {
-        carHighScore = Math.floor(carScore / 5);
+      if (displayScore > carHighScore) {
+        carHighScore = displayScore;
         localStorage.setItem('dio_car_highscore', carHighScore);
         document.getElementById('car-high-score').textContent = carHighScore;
       }
+
+      if (invulnerableTimer > 0) invulnerableTimer--;
+      if (hitTextTimer > 0) hitTextTimer--;
 
       // Spawn obstacles
       if (Math.random() < 0.035) {
@@ -751,9 +788,21 @@
         const obsX = lanesX[obstacles[i].lane];
         const obsY = obstacles[i].y;
 
-        if (Math.abs(playerX - obsX) < 40 && Math.abs(playerY - obsY) < 60) {
-          triggerCarGameOver();
-          return;
+        if (invulnerableTimer === 0 && Math.abs(playerX - obsX) < 40 && Math.abs(playerY - obsY) < 50) {
+          // BUMP HIT DETECTED!
+          carLives--;
+          updateLivesUI();
+          invulnerableTimer = 60; // 60 frames (~1.2s) immunity
+          hitTextTimer = 40; // Display "HIT!" message
+          hitSparkX = (playerX + obsX) / 2;
+          hitSparkY = (playerY + obsY) / 2;
+
+          if (carLives <= 0) {
+            triggerCarGameOver();
+            return;
+          } else {
+            document.getElementById('car-status').textContent = `WARNING: BUMP HIT! ${carLives} Lives Remaining!`;
+          }
         }
       }
 
@@ -775,12 +824,19 @@
       }
 
       document.getElementById('car-status').textContent = `Game Over! Score: ${carPrevScore} (Press Spacebar to retry)`;
+      drawCarGame();
     }
 
     function drawCarGame() {
       // Clear Road Canvas
       carCtx.fillStyle = '#1e1e24';
       carCtx.fillRect(0, 0, carCanvas.width, carCanvas.height);
+
+      // Red flash on hit frame
+      if (hitTextTimer > 30) {
+        carCtx.fillStyle = 'rgba(255, 0, 0, 0.25)';
+        carCtx.fillRect(0, 0, carCanvas.width, carCanvas.height);
+      }
 
       // Draw Road Lanes
       carCtx.strokeStyle = '#444';
@@ -823,19 +879,86 @@
         }
       });
 
-      // Draw Player Car
+      // Draw Player Car (Flashes during invulnerability)
       const playerX = lanesX[carLane];
       const playerY = 400;
+      const displayScore = Math.floor(carScore / 5);
 
-      if (selectedCarType === 'TRUCK') {
-        drawRedPickupTruck(carCtx, playerX, playerY, 1);
-      } else {
-        drawWhiteSportsCar(carCtx, playerX, playerY, 1);
+      if (invulnerableTimer === 0 || Math.floor(invulnerableTimer / 4) % 2 === 0) {
+        if (selectedCarType === 'TRUCK') {
+          drawRedPickupTruck(carCtx, playerX, playerY, 1, displayScore);
+        } else {
+          drawWhiteSportsCar(carCtx, playerX, playerY, 1, displayScore);
+        }
+      }
+
+      // Draw Spark/Collision effect on hit
+      if (hitTextTimer > 0) {
+        carCtx.fillStyle = '#ffea00';
+        carCtx.beginPath();
+        carCtx.arc(hitSparkX, hitSparkY, 25, 0, Math.PI * 2);
+        carCtx.fill();
+
+        carCtx.fillStyle = '#ff1744';
+        carCtx.font = 'bold 28px Arial';
+        carCtx.textAlign = 'center';
+        carCtx.fillText('💥 HIT!', playerX, playerY - 45);
       }
     }
 
+    // --- Dynamic Car Body Gradient Selector ---
+    function getCarBodyStyle(ctx, currentScore, defaultColor) {
+      if (currentScore < 150) return defaultColor;
+
+      let grad = ctx.createLinearGradient(-18, -30, 18, 30);
+
+      if (currentScore >= 2050) {
+        // Celestial Galaxy
+        grad.addColorStop(0, '#e0c3fc'); grad.addColorStop(0.5, '#8ec5fc'); grad.addColorStop(1, '#ff0844');
+      } else if (currentScore >= 1900) {
+        // Dark Crimson Neon
+        grad.addColorStop(0, '#ff0055'); grad.addColorStop(1, '#000000');
+      } else if (currentScore >= 1750) {
+        // Diamond Gold Silver
+        grad.addColorStop(0, '#ffe000'); grad.addColorStop(0.5, '#ffffff'); grad.addColorStop(1, '#799f0c');
+      } else if (currentScore >= 1600) {
+        // Prism Rainbow
+        grad.addColorStop(0, '#ff0000'); grad.addColorStop(0.2, '#ff7f00'); grad.addColorStop(0.4, '#ffff00');
+        grad.addColorStop(0.6, '#00ff00'); grad.addColorStop(0.8, '#0000ff'); grad.addColorStop(1, '#8b00ff');
+      } else if (currentScore >= 1450) {
+        // Aurora Green-Blue
+        grad.addColorStop(0, '#11998e'); grad.addColorStop(1, '#38ef7d');
+      } else if (currentScore >= 1300) {
+        // Hyper Red-Black
+        grad.addColorStop(0, '#eb3349'); grad.addColorStop(1, '#f45c43');
+      } else if (currentScore >= 1050) {
+        // Cosmic Bronze Gold
+        grad.addColorStop(0, '#f857a6'); grad.addColorStop(1, '#ff5858');
+      } else if (currentScore >= 900) {
+        // Electric Violet Pink
+        grad.addColorStop(0, '#ec008c'); grad.addColorStop(1, '#fc6767');
+      } else if (currentScore >= 750) {
+        // Deep Ocean Blue Teal
+        grad.addColorStop(0, '#2193b0'); grad.addColorStop(1, '#6dd5ed');
+      } else if (currentScore >= 600) {
+        // Flame Magenta Yellow
+        grad.addColorStop(0, '#ff0844'); grad.addColorStop(1, '#ffb199');
+      } else if (currentScore >= 450) {
+        // Emerald Lime
+        grad.addColorStop(0, '#0ba360'); grad.addColorStop(1, '#3cba92');
+      } else if (currentScore >= 300) {
+        // Cyber Cyan Purple
+        grad.addColorStop(0, '#8e2de2'); grad.addColorStop(1, '#4a00e0');
+      } else if (currentScore >= 150) {
+        // Sunset Orange
+        grad.addColorStop(0, '#f12711'); grad.addColorStop(1, '#f5af19');
+      }
+
+      return grad;
+    }
+
     // --- Red Pickup Truck Rendering ---
-    function drawRedPickupTruck(ctx, x, y, scale) {
+    function drawRedPickupTruck(ctx, x, y, scale, currentScore) {
       ctx.save();
       ctx.translate(x, y);
       ctx.scale(scale, scale);
@@ -847,16 +970,16 @@
       ctx.fillRect(-22, 15, 8, 16);
       ctx.fillRect(14, 15, 8, 16);
 
-      // Truck Body (Red)
-      ctx.fillStyle = '#d32f2f';
+      // Truck Body Paint (Default Red or Dynamic Gradient at 150-score steps)
+      ctx.fillStyle = getCarBodyStyle(ctx, currentScore, '#d32f2f');
       ctx.fillRect(-18, -30, 36, 60);
 
       // Pickup Truck Bed (Rear open area)
-      ctx.fillStyle = '#8b0000';
+      ctx.fillStyle = '#1a0000';
       ctx.fillRect(-14, 5, 28, 20);
 
       // Cabin & Windshield
-      ctx.fillStyle = '#b71c1c';
+      ctx.fillStyle = '#111111';
       ctx.fillRect(-16, -20, 32, 22);
 
       ctx.fillStyle = '#80d8ff'; // Glass
@@ -871,7 +994,7 @@
     }
 
     // --- White Sports Car Rendering ---
-    function drawWhiteSportsCar(ctx, x, y, scale) {
+    function drawWhiteSportsCar(ctx, x, y, scale, currentScore) {
       ctx.save();
       ctx.translate(x, y);
       ctx.scale(scale, scale);
@@ -883,8 +1006,8 @@
       ctx.fillRect(-20, 15, 6, 14);
       ctx.fillRect(14, 15, 6, 14);
 
-      // Sleek Sports Body (White)
-      ctx.fillStyle = '#f5f5f5';
+      // Sleek Sports Body (Default White or Dynamic Gradient at 150-score steps)
+      ctx.fillStyle = getCarBodyStyle(ctx, currentScore, '#ffffff');
       ctx.beginPath();
       ctx.moveTo(0, -32);
       ctx.lineTo(16, -18);
